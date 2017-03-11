@@ -1,0 +1,6 @@
+appdirs==1.4.3
+clang==3.8
+cogapp==2.5.1
+packaging==16.8
+pyparsing==2.2.0
+six==1.10.0
