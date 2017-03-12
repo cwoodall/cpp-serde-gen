@@ -1,33 +1,8 @@
-#!python
+from serde_type import *
 import clang.cindex as cl
-import logging
 from ctypes.util import find_library
 import ccsyspath
-
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-class SerializableField(object):
-    def __init__(self, name, t="void", access=cl.AccessSpecifier.PUBLIC):
-        self.name = name
-        self.type = t
-        self.access = access
-
-    def __str__(self):
-        return "{0}, {1}, {2}".format(self.name, self.type, self.access)
-
-class SerializableType(object):
-    def __init__(self, name, fields=[]):
-        self.name = name
-        self.fields = fields
-
-    def append_field(self, field):
-        self.fields.append(field)
-
-    def __str__(self):
-        return "name: {0}\nfields: {1}".format(self.name, [str(field) for field in self.fields])
-
+import re
 
 """
 Get the TranslationalUnit for the input fule listed:
@@ -109,20 +84,22 @@ Parameters ::
     - match_str: The comment string to match.
 
 Returns ::
-    - A List of SerializableTypes.
+    - A List of SerdeTypes.
 """
-def find_serializable_types(tu, match_str="//+mpack-serializable"):
+def find_serializable_types(tu, match_str="//\+serde\(([A-Za-z\s,_]*)\)"):
     match_types = [cl.CursorKind.STRUCT_DECL, cl.CursorKind.CLASS_DECL]
 
     tokens = tu.cursor.get_tokens()
 
     found = False
     serializables = []
+    serdes = []
     # iterate through all tokens, looking for the match_str in a comment. If
     # found the name, and fields are extracted from the next struct or class
     # definition. After extracting these declaration the parser continues to
     # look for more Comment otkens matching match_str.
     for token in tokens:
+        match = re.match(match_str, token.spelling)
         if found:
           cursor = cl.Cursor().from_location(tu, token.location)
           if cursor.kind in match_types:
@@ -130,12 +107,13 @@ def find_serializable_types(tu, match_str="//+mpack-serializable"):
               # to for the full C++ name.
               name = "::".join(get_current_scope(cursor) + [cursor.spelling])
               # Extract all of the fields (including access_specifiers)
-              fields = [SerializableField(field.spelling, field.type.spelling, field.access_specifier) for field in cursor.type.get_fields()]
-              serializables.append(SerializableType(name, fields))
-
+              fields = [SerdeField(field.spelling, field.type.spelling, field.access_specifier.name) for field in cursor.type.get_fields()]
+              serializables.append(SerdeType(name, fields, serdes))
               # Start searching for more comments.
               found = False
-        elif (token.kind == cl.TokenKind.COMMENT) and (token.spelling == match_str):
+              serdes = []
+        elif (token.kind == cl.TokenKind.COMMENT) and match:
+            serdes = [x.strip() for x in match.groups()[0].split(",")]
             found = True # Start looking for the struct/class declaration
 
     return serializables

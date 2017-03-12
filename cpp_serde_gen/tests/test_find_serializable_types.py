@@ -1,9 +1,13 @@
+from .. import *
+import clang.cindex as cl
+
+UUT_FILE_ONE_H = """
 #include <iostream>
 #include <array>
 #include <stdint.h>
 
 typedef float float32_t;
-//+mpack-serializable
+//+serde()
 struct GroupStatus {
   uint8_t handedness; ///<
   uint8_t outerlink;  ///<
@@ -14,7 +18,7 @@ struct GroupStatus {
 namespace outer_test {
 namespace test {
 
-//+mpack-serializable
+//+serde()
 struct InNS {
   float32_t cool; ///<
   float32_t lol;
@@ -23,10 +27,10 @@ struct InNS {
   char bar[10];
 };
 
-//+mpack-serializable
+//+serde()
 class MyClass {
 public:
-  //+mpack-serializable
+  //+serde(mpack)
   struct InClass {
     float32_t cool; ///<
   };
@@ -37,7 +41,7 @@ private:
 }
 }
 
-//+mpack-serializable
+//+serde(A, B)
 struct OutOfNS {
   uint8_t handedness; ///<
   uint8_t outerlink;  ///<
@@ -50,3 +54,12 @@ int main() {
 
   return 0;
 }
+"""
+
+def test_serializable_types():
+    tu = get_clang_TranslationUnit("temp.h", in_str=UUT_FILE_ONE_H)
+    serializables = find_serializable_types(tu)
+    for serializable in serializables:
+        print(serializable)
+
+    assert(False)
