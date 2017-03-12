@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!python
 import clang.cindex as cl
 import logging
 from ctypes.util import find_library
@@ -139,8 +139,3 @@ def find_serializable_types(tu, match_str="//+mpack-serializable"):
             found = True # Start looking for the struct/class declaration
 
     return serializables
-
-tu = get_clang_TranslationUnit("test.cpp")
-serializables = find_serializable_types(tu)
-for serializable in serializables:
-    print(serializable)
