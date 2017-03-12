@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import clang.cindex as cl
 import logging
 from ctypes.util import find_library
@@ -6,6 +7,26 @@ import ccsyspath
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+class SerializableField(object):
+    def __init__(self, name, t="void", access=cl.AccessSpecifier.PUBLIC):
+        self.name = name
+        self.type = t
+        self.access = access
+
+    def __str__(self):
+        return "{0}, {1}, {2}".format(self.name, self.type, self.access)
+
+class SerializableType(object):
+    def __init__(self, name, fields=[]):
+        self.name = name
+        self.fields = fields
+
+    def append_field(self, field):
+        self.fields.append(field)
+
+    def __str__(self):
+        return "name: {0}\nfields: {1}".format(self.name, [str(field) for field in self.fields])
 
 
 """
@@ -76,29 +97,23 @@ def get_current_scope(cursor):
     else:
         return []
 
-class SerializableField(object):
-    def __init__(self, name, t="void", access=cl.AccessSpecifier.PUBLIC):
-        self.name = name
-        self.type = t
-        self.access = access
-
-    def __str__(self):
-        return "{0}, {1}, {2}".format(self.name, self.type, self.access)
-
-class SerializableType(object):
-    def __init__(self, name, fields=[]):
-        self.name = name
-        self.fields = fields
-
-    def append_field(self, field):
-        self.fields.append(field)
-
-    def __str__(self):
-        return "name: {0}\nfields: {1}".format(self.name, [str(field) for field in self.fields])
-
 """
+Iterate through all tokens in the current TranslationalUnit looking for comments
+which match the match_str. If the comment match look for the next struct or
+class declaration, start extracting the scope by looking at the lexical parents
+of the declaration. This will let you extract the name, then extract all of the
+fields.
+
+Parameters ::
+    - tu: The TranslationalUnit to search over
+    - match_str: The comment string to match.
+
+Returns ::
+    - A List of SerializableTypes.
 """
 def find_serializable_types(tu, match_str="//+mpack-serializable"):
+    match_types = [cl.CursorKind.STRUCT_DECL, cl.CursorKind.CLASS_DECL]
+
     tokens = tu.cursor.get_tokens()
 
     found = False
@@ -110,14 +125,18 @@ def find_serializable_types(tu, match_str="//+mpack-serializable"):
     for token in tokens:
         if found:
           cursor = cl.Cursor().from_location(tu, token.location)
-          if cursor.kind in [cl.CursorKind.STRUCT_DECL, cl.CursorKind.CLASS_DECL]:
+          if cursor.kind in match_types:
+              # Extract the name, and the scope of the cursor and join them
+              # to for the full C++ name.
               name = "::".join(get_current_scope(cursor) + [cursor.spelling])
+              # Extract all of the fields (including access_specifiers)
               fields = [SerializableField(field.spelling, field.type.spelling, field.access_specifier) for field in cursor.type.get_fields()]
-              s = SerializableType(name, fields)
-              serializables.append(s)
+              serializables.append(SerializableType(name, fields))
+
+              # Start searching for more comments.
               found = False
         elif (token.kind == cl.TokenKind.COMMENT) and (token.spelling == match_str):
-            found = True
+            found = True # Start looking for the struct/class declaration
 
     return serializables
 
