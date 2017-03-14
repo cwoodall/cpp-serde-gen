@@ -9,11 +9,16 @@ class SerdeField(object):
     def __str__(self):
         return "{0}, {1}, {2}".format(self.name, self.type, self.access)
 
-class SerdeType(object):
+    def __eq__(self, other):
+        return self.name == other.name and \
+               self.type == other.type and \
+               self.access == other.access
+
+class SerdeRecord(object):
     def __init__(self, name, fields=[], serdes=[]):
         self.name = name
         self.fields = fields
-        self.serdes = []
+        self.serdes = serdes
 
     def append_field(self, field):
         self.fields.append(field)

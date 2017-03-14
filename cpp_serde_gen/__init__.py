@@ -4,6 +4,7 @@ from ctypes.util import find_library
 import ccsyspath
 import re
 
+
 """
 Get the TranslationalUnit for the input fule listed:
 
@@ -17,8 +18,6 @@ Returns ::
     - A TranslationalUnits
 """
 def get_clang_TranslationUnit(path="tmp.cpp", in_args=[], in_str="", options=0):
-    # Get the matching clang library file (.so)
-    cl.Config.set_library_file(find_library('clang-3.8'))
 
     # Make sure we are parsing as std c++11
     args    = '-x c++ --std=c++11'.split()
@@ -84,7 +83,7 @@ Parameters ::
     - match_str: The comment string to match.
 
 Returns ::
-    - A List of SerdeTypes.
+    - A List of SerdeRecords.
 """
 def find_serializable_types(tu, match_str="//\+serde\(([A-Za-z\s,_]*)\)"):
     match_types = [cl.CursorKind.STRUCT_DECL, cl.CursorKind.CLASS_DECL]
@@ -108,9 +107,10 @@ def find_serializable_types(tu, match_str="//\+serde\(([A-Za-z\s,_]*)\)"):
               name = "::".join(get_current_scope(cursor) + [cursor.spelling])
               # Extract all of the fields (including access_specifiers)
               fields = [SerdeField(field.spelling, field.type.spelling, field.access_specifier.name) for field in cursor.type.get_fields()]
-              serializables.append(SerdeType(name, fields, serdes))
+              serializables.append(SerdeRecord(name, fields, serdes))
               # Start searching for more comments.
               found = False
+              # Clear the list of registered serdes for this Record.
               serdes = []
         elif (token.kind == cl.TokenKind.COMMENT) and match:
             serdes = [x.strip() for x in match.groups()[0].split(",")]
