@@ -2,6 +2,7 @@ from .. import *
 import clang.cindex as cl
 import unittest
 from ..serdes.printf import *
+from ..serdes.mpack import *
 from ..serde_registry import *
 # Get the matching clang library file (.so)
 cl.Config.set_library_file(find_library('clang-3.8'))
@@ -14,7 +15,7 @@ UUT_FILE_ONE_H = """
 
 typedef float float32_t;
 
-//+serde(printf)
+//+serde(printf, mpack)
 struct Foo {
   uint8_t bar1; ///<
   uint8_t bar2;  ///<
@@ -75,7 +76,8 @@ class TestFindSerializableTypes(unittest.TestCase):
         self.tu = get_clang_TranslationUnit("temp.h", in_str=UUT_FILE_ONE_H)
         self.serializables = find_serializable_types(self.tu)
         self.registery = SerdeRegistry(
-            [PrintfSerdeGenerator(), PrintfSerdeGenerator("A"), PrintfSerdeGenerator("B")])
+            [PrintfSerdeGenerator(), PrintfSerdeGenerator("A"), PrintfSerdeGenerator("B"),
+             MpackSerdeGenerator()])
 
     def test_find_struct_Foo(self):
         assert(self.serializables[0].name == "Foo")
@@ -135,7 +137,10 @@ class TestFindSerializableTypes(unittest.TestCase):
                 try:
                     print(self.registery.generate_serialize(
                         serde_key, serializable))
-                except:
+                    print(self.registery.generate_deserialize(
+                        serde_key, serializable))
+
+                except Exception as e:
                     print(
-                        "No Registered Serde Generator for key {0}".format(serde_key))
+                        "No Registered Serde Generator for key {0}. {1}".format(serde_key, e))
         assert(False)
