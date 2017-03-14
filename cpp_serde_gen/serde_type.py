@@ -1,6 +1,8 @@
 import clang.cindex as cl
 
+
 class SerdeField(object):
+
     def __init__(self, name, t="void", access="PUBLIC"):
         self.name = name
         self.type = t
@@ -11,10 +13,12 @@ class SerdeField(object):
 
     def __eq__(self, other):
         return self.name == other.name and \
-               self.type == other.type and \
-               self.access == other.access
+            self.type == other.type and \
+            self.access == other.access
+
 
 class SerdeRecord(object):
+
     def __init__(self, name, fields=[], serdes=[]):
         self.name = name
         self.fields = fields
@@ -29,4 +33,4 @@ class SerdeRecord(object):
 
     def __str__(self):
         return "name: {0}\nfields: {1}".format(self.name,
-            [str(field) for field in self.fields])
+                                               [str(field) for field in self.fields])

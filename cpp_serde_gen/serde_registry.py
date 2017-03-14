@@ -1,4 +1,5 @@
 class SerdeRegistry(object):
+
     def __init__(self, serdes=[]):
         self.registry = {serde.key: serde for serde in serdes}
 
