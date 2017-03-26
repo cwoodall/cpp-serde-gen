@@ -1,4 +1,6 @@
-from record import *
+from .record import *
+from .serde_registry import *
+from .serdes import *
 import clang.cindex as cl
 from ctypes.util import find_library
 import ccsyspath

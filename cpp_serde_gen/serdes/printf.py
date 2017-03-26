@@ -9,8 +9,7 @@ class PrintfSerdeGenerator(GenericSerdeGenerator):
 
     def generate_serialize_for_fields(self, record):
         fmt_str = """\tprintf("\\n\\t{0}: ");
-\tprintf_serialize(data.{1});
-\tprintf("\\n");"""
+\tprintf_serialize(data.{1});"""
         field_strs = [fmt_str.format(field.name,
                                      field.name) for field in record.fields]
         return "\n".join(field_strs)
@@ -20,6 +19,8 @@ class PrintfSerdeGenerator(GenericSerdeGenerator):
 bool printf_serialize({0} const & data) {{
 \tprintf("{0}:");
 {1}
+\tprintf("\\n");
+\treturn true;
 }}""".format(record.name, self.generate_serialize_for_fields(record)))
 
     def generate_deserialize(self, record):

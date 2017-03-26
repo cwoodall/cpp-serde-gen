@@ -1,0 +1,94 @@
+#include <iostream>
+#include <array>
+#include <vector>
+#include <stdint.h>
+
+bool printf_serialize(float data) {
+  printf("%f", data);
+  return true;
+}
+
+bool printf_serialize(uint8_t data) {
+  printf("%u", data);
+  return true;
+}
+
+template <typename T, size_t S>
+bool printf_serialize(std::array<T, S> const &data) {
+  printf("[");
+
+  const char *kSeperator = ", ";
+  const char *sep = "";
+  for (const auto &elem : data) {
+    printf(sep);
+    printf_serialize(elem);
+    sep = kSeperator;
+  }
+
+  printf("]");
+  return true;
+}
+
+//+serde(printf)
+struct Foo {
+  uint8_t bar1; ///<
+  float bar2; ///<
+  std::array<float, 4> bar3; ///<
+};
+
+namespace Baz {
+  //+serde(printf)
+  struct MyStruct {
+    uint8_t a; ///<
+    std::array<float, 4> b; ///<
+  };
+}
+
+/* [[[cog
+from cpp_serde_gen import *
+
+tu = get_clang_TranslationUnit(cog.inFile)
+serializables = find_serializable_types(tu)
+registery = SerdeRegistry([PrintfSerdeGenerator()])
+
+for serializable in serializables:
+  for key in serializable.serdes:
+    try:
+      cog.outl(registery.generate_serialize(key, serializable))
+      cog.outl()
+    except Exception as e:
+      cog.msg("Could not serialize {}".format(serializable.name))
+
+    try:
+      cog.outl(registery.generate_deserialize(key, serializable))
+      cog.outl()
+    except:
+      cog.msg("Could not deserialize {}".format(serializable.name))
+
+]]] */
+// [[[end]]]
+
+int main() {
+  Foo foo = {
+    0xde,
+    3.14159,
+    {1.0, 2.0, 3.0, 5.0}
+  };
+
+  Baz::MyStruct a = {1, {2,3,4,5}};
+
+  printf_serialize(foo);
+  printf_serialize(a);
+
+  // Output:
+  //
+  // Foo:
+  // 	bar1: 222
+  // 	bar2: 3.141590
+  // 	bar3: [1.000000, 2.000000, 3.000000, 5.000000]
+  // Baz::MyStruct:
+  // 	a: 1
+  // 	b: [2.000000, 3.000000, 4.000000, 5.000000]
+
+  return 0;
+}
