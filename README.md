@@ -75,7 +75,7 @@ So for example you can make a `struct Foo` and mark it for the `printf`
 serializer, which just prints the struct (from
 `examples/example-01.cpp.cog`):
 
-```
+```c++
 //+serde(printf)
 struct Foo {
   uint8_t bar1; ///<
@@ -87,7 +87,7 @@ struct Foo {
 If we then run the following code inline using cog
 (see `examples/example-01.cpp.cog`):
 
-```
+```py
 from cpp_serde_gen import *
 
 tu = get_clang_TranslationUnit(cog.inFile)
@@ -115,7 +115,7 @@ requires that all of the `struct`'s field types have a `printf_serialize`
 function written for them, this is a flexible method since you can embed
 complicated types inside of one another:
 
-```
+```c++
 bool printf_serialize(Foo const & data) {
 	printf("Foo:");
 	printf("\n\tbar1: ");
@@ -138,7 +138,7 @@ Writing a new serializer is rather easy, we need to inherit from
 So for example we can implement `MyNewSerializer` which uses the serde
 key `my_new`:
 
-```
+```py
 from .generic import GenericSerdeGenerator
 from textwrap import dedent
 
@@ -161,7 +161,7 @@ void my_new_deserializer({0} *data) {{ return; }}
 
 Which will generate (see `examples/example-02`):
 
-```
+```c++
 void my_new_serializer(Foo const &data) { return; }
 void my_new_deserializer(Foo *data) { return; }
 ```
