@@ -3,11 +3,15 @@ CPP_FLAGS="-std=c++11"
 COG="cog.py"
 COG_FLAGS="-d"
 
-example-01: example-01.cpp
+all: example-01.o example-02.o
+
+.PRECIOUS: %.cpp
+
+%.o: %.cpp
 	$(CPP) $(CPPFLAGS) -o $@ $<
 
 %.cpp: %.cpp.cog
-	$(COG) $(COG_FLAGS) -o $@ $< 
+	$(COG) $(COG_FLAGS) -o $@ $<
 
 clean:
-	rm example-01 example-01.cpp
+	rm *.o *.cpp

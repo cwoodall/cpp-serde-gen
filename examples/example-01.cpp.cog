@@ -47,16 +47,27 @@ namespace Baz {
 /* [[[cog
 from cpp_serde_gen import *
 
+# Read the current file being processed by cog and have clang parse it's
+# AST and tokens.
 tu = get_clang_TranslationUnit(cog.inFile)
+# Search the TranslationalUnit for structs marked //+serde() and generate
+# the record structures for them.
 serializables = find_serializable_types(tu)
+# Register the serializers we want to use. In this case just
+# PrintfSerdeGenerator which has the default key of `printf`
 registery = SerdeRegistry([PrintfSerdeGenerator()])
 
+# Iterate through all of the structs we want to serialize, and generate
+# the output and print it to the output file using cog.
 for serializable in serializables:
   for key in serializable.serdes:
     try:
+      # print the generated code to the output file using cog.
       cog.outl(registery.generate_serialize(key, serializable))
+      # add a newline after
       cog.outl()
     except Exception as e:
+      # cog.msg is similar to a logger and gets printed to stderr.
       cog.msg("Could not serialize {}".format(serializable.name))
 
     try:
