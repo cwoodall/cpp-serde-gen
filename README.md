@@ -1,10 +1,13 @@
 # cpp-serde-gen: Use Python To Parse The C++ AST and Generate Serializing Functions
 
 **Table of Contents**:
+
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Usage](#usage)
 - [Installation](#installation)
+- [Usage](#usage)
+	- [Running The Examples](#running-the-examples)
+	- [Running The Tests](#running-the-tests)
 - [Resources](#resources)
 
 <!-- /TOC -->
@@ -25,7 +28,8 @@ $ cd cpp-serde-gen
 $ sudo pip install .
 ```
 
-## Running The Examples
+## Usage
+### Running The Examples
 
 ```sh
 $ cd examples
@@ -50,7 +54,7 @@ Description of examples:
 - `example-01`: Run the example `printf` serializer, on two structs, one of
                 which is in a namespace.
 
-## Running The Tests
+### Running The Tests
 
 ```sh
 $ nosetests
