@@ -1,4 +1,4 @@
-from serde_type import *
+from record import *
 import clang.cindex as cl
 from ctypes.util import find_library
 import ccsyspath
@@ -86,7 +86,7 @@ def find_serializable_types(tu, match_str="//\+serde\(([A-Za-z\s,_]*)\)"):
         - match_str: The comment string to match.
 
     Returns ::
-        - A List of SerdeRecords.
+        - A List of Records.
     """
     match_types = [cl.CursorKind.STRUCT_DECL, cl.CursorKind.CLASS_DECL]
 
@@ -108,9 +108,9 @@ def find_serializable_types(tu, match_str="//\+serde\(([A-Za-z\s,_]*)\)"):
                 # to for the full C++ name.
                 name = "::".join(get_current_scope(cursor) + [cursor.spelling])
                 # Extract all of the fields (including access_specifiers)
-                fields = [SerdeField(field.spelling, field.type.spelling,
-                                     field.access_specifier.name) for field in cursor.type.get_fields()]
-                serializables.append(SerdeRecord(name, fields, serdes))
+                fields = [RecordField(field.spelling, field.type.spelling,
+                                      field.access_specifier.name) for field in cursor.type.get_fields()]
+                serializables.append(Record(name, fields, serdes))
                 # Start searching for more comments.
                 found = False
                 # Clear the list of registered serdes for this Record.

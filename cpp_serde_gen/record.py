@@ -1,7 +1,9 @@
 import clang.cindex as cl
 
 
-class SerdeField(object):
+class RecordField(object):
+    """
+    """
 
     def __init__(self, name, t="void", access="PUBLIC"):
         self.name = name
@@ -17,7 +19,7 @@ class SerdeField(object):
             self.access == other.access
 
 
-class SerdeRecord(object):
+class Record(object):
 
     def __init__(self, name, fields=[], serdes=[]):
         self.name = name
@@ -33,4 +35,5 @@ class SerdeRecord(object):
 
     def __str__(self):
         return "name: {0}\nfields: {1}".format(self.name,
-                                               [str(field) for field in self.fields])
+                                               [str(field) for field in
+                                                self.fields])
