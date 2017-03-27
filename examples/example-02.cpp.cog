@@ -25,27 +25,7 @@ void my_new_serializer({0} const &data) {{ return; }}
 void my_new_deserializer({0} *data) {{ return; }}
 """.format(record.name))
 
-tu = get_clang_TranslationUnit(cog.inFile)
-serializables = find_serializable_types(tu)
-registery = SerdeRegistry([MyNewSerializer()])
-
-for serializable in serializables:
-  for key in serializable.serdes:
-    try:
-      # print the generated code to the output file using cog.
-      cog.outl(registery.generate_serialize(key, serializable))
-      # add a newline after
-      cog.outl()
-    except Exception as e:
-      # cog.msg is similar to a logger and gets printed to stderr.
-      cog.msg("Could not serialize {}".format(serializable.name))
-
-    try:
-      cog.outl(registery.generate_deserialize(key, serializable))
-      cog.outl()
-    except:
-      cog.msg("Could not deserialize {}".format(serializable.name))
-
+cog.outl(generate_serde_code(cog.inFile, [MyNewSerializer()]))
 ]]] */
 // [[[end]]]
 

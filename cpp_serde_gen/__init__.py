@@ -5,6 +5,7 @@ import clang.cindex as cl
 from ctypes.util import find_library
 import ccsyspath
 import re
+import cog
 
 
 def get_clang_TranslationUnit(path="t.cpp", in_args=[], in_str="", options=0):
@@ -122,3 +123,38 @@ def find_serializable_types(tu, match_str="//\+serde\(([A-Za-z\s,_]*)\)"):
             found = True  # Start looking for the struct/class declaration
 
     return serializables
+
+
+def generate_serde_code(in_file, serdes=[]):
+    """
+    Take an input file, parse it's AST for serializable objects and then
+    use the SerdeGenerators to create strings of C++ code containing the
+    generators.
+
+    Parameters ::
+        - in_file: A path to a file for clang to parse.
+        - serdes: A list of SerdeGenerators to use to generate the outputs.
+
+    Returns ::
+        - A string of all of the generated code with new line seperation.
+    """
+    tu = get_clang_TranslationUnit(in_file)
+    records = find_serializable_types(tu)
+    registry = SerdeRegistry(serdes)
+
+    out_str = ""
+    for record in records:
+        for serde in record.serdes:
+            try:
+                # print the generated code to the output file using cog.
+                out_str += registery.generate_serialize(serde, record) + "\n"
+                # add a newline after
+            except Exception as e:
+                # cog.msg is similar to a logger and gets printed to stderr.
+                print("Could not serialize {}".format(record.name))
+
+            try:
+                out_str += registery.generate_deserialize(serde, record) + "\n"
+            except:
+                print("Could not deserialize {}".format(record.name))
+    return out_str

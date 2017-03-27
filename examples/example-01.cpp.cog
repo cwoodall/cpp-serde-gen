@@ -76,6 +76,8 @@ for serializable in serializables:
     except:
       cog.msg("Could not deserialize {}".format(serializable.name))
 
+# The above code can be replace with:
+# cog.outl(generate_serde_code(cog.inFile, [PrintfSerdeGenerator()]))
 ]]] */
 // [[[end]]]
 
