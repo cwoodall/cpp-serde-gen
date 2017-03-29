@@ -17,7 +17,7 @@
 
 ## Installation
 
-This application requires:
+This library requires:
 
 - Python 2.7 and is not tested with Python 3.0.
 - pip (for installing dependencies)
@@ -54,10 +54,12 @@ the results. You can also run the examples.
 
 Description of examples:
 
-- `example-01`: Run the example `printf` serializer, on two structs, one of
+- [`example-01`][example-01]: Run the example `printf` serializer, on two structs, one of
                 which is in a namespace.
-- `example-02`: Create and register a custom serializer calle `my_new`.
+- [`example-02`][example-02]: Create and register a custom serializer calle `my_new`.
 
+[example-01]: examples/example-01.cpp.cog
+[example-02]: examples/example-02.cpp.cog
 
 ### Running The Tests
 
@@ -107,7 +109,6 @@ for serializable in serializables:
       cog.outl()
     except:
       cog.msg("Could not deserialize {}".format(serializable.name))
-
 ```
 
 This will generate the following code. Note that the `printf` serializser
@@ -127,6 +128,15 @@ bool printf_serialize(Foo const & data) {
 	printf("\n");
 	return true;
 }
+```
+
+A shorthand method of doing this is also provided, the following code will
+achieve the same goal:
+
+```python
+from cpp_serde_gen import serdes, generate_serde_code
+
+cog.outl(generate_serde_code(cog.inFile, [PrintfSerdeGenerator()]))
 ```
 
 ### Writing a Serializer
@@ -165,6 +175,7 @@ Which will generate (see `examples/example-02`):
 void my_new_serializer(Foo const &data) { return; }
 void my_new_deserializer(Foo *data) { return; }
 ```
+
 ## Resources
 
 - http://eli.thegreenplace.net/2011/07/03/parsing-c-in-python-with-clang
