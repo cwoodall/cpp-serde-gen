@@ -56,7 +56,7 @@ Description of examples:
 
 - [`example-01`][example-01]: Run the example `printf` serializer, on two structs, one of
                 which is in a namespace.
-- [`example-02`][example-02]: Create and register a custom serializer calle `my_new`.
+- [`example-02`][example-02]: Create and register a custom serializer called `my_new`.
 
 [example-01]: examples/example-01.cpp.cog
 [example-02]: examples/example-02.cpp.cog
